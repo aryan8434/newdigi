@@ -16,7 +16,7 @@ const voteRouter = require("./routes/voteRoute");
 const voterRouter = require("./routes/voterRoute");
 const candidateRouter = require("./routes/candidateRoute");
 const configRouter = require("./routes/configRoute");
-const uploadRouter = require("./routes/uploadRoute");
+const uploadRouter = require("./routes/uploadroute");
 const adminRouter = require("./routes/adminRoute");
 const { getServerTime } = require("./middleware/timeGuard");
 
@@ -97,7 +97,7 @@ app.use((req, res, next) => {
 io.on("connection", (socket) => {
   socket.on("getTime", async () => {
     try {
-      const Config = require("./model/Config");
+      const Config = require("./model/config");
       const config = await Config.findOne().sort({ createdAt: -1 }).lean();
       socket.emit("timeUpdate", {
         serverTime: new Date().toISOString(),
@@ -140,7 +140,7 @@ const InitializeConnection = async () => {
     console.log("DB Connected");
 
     const port = process.env.PORT || 3000;
-    server.listen(port, () => {
+    server.listen(port, "0.0.0.0", () => {
       console.log("Server is running at Port:", port);
     });
   } catch (error) {
