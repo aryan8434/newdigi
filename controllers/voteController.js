@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
-const Voter = require('../model/Voter');
-const Candidate = require('../model/Candidate');
-const { Vote } = require('../model/Vote');
-const Config = require('../model/config');
-const { hashVoterId, verifyFingerprintHash } = require('../utils/cryptoUtils');
+const mongoose = require("mongoose");
+const Voter = require("../model/Voter");
+const Candidate = require("../model/Candidate");
+const { Vote } = require("../model/Vote");
+const Config = require("../model/config");
+const { hashVoterId, verifyFingerprintHash } = require("../utils/cryptoUtils");
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
@@ -14,13 +14,15 @@ async function castVote(req, res) {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { candidateId, aadhar, constituency, ward, fingerprintHash } = req.body;
+    const { candidateId, aadhar, constituency, ward, fingerprintHash } =
+      req.body;
 
     if (!candidateId || !aadhar || !constituency || !ward || !fingerprintHash) {
       await session.abortTransaction();
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: candidateId, aadhar, constituency, ward, fingerprintHash',
+        message:
+          "Missing required fields: candidateId, aadhar, constituency, ward, fingerprintHash",
       });
     }
 
@@ -37,7 +39,7 @@ async function castVote(req, res) {
       await session.abortTransaction();
       return res.status(404).json({
         success: false,
-        message: 'Voter not found or not verified for this constituency/ward.',
+        message: "Voter not found or not verified for this constituency/ward.",
       });
     }
 
@@ -45,25 +47,30 @@ async function castVote(req, res) {
       await session.abortTransaction();
       return res.status(401).json({
         success: false,
-        message: 'Fingerprint verification failed.',
+        message: "Fingerprint verification failed.",
       });
     }
 
     const now = new Date();
-    if (voter.lastVotedAt && now - new Date(voter.lastVotedAt) < THREE_DAYS_MS) {
+    if (
+      voter.lastVotedAt &&
+      now - new Date(voter.lastVotedAt) < THREE_DAYS_MS
+    ) {
       await session.abortTransaction();
       return res.status(403).json({
         success: false,
-        message: 'You have already voted. You cannot vote again for 3 days.',
+        message: "You have already voted. You cannot vote again for 3 days.",
       });
     }
 
-    const candidate = await Candidate.findById(candidateId).session(session).lean();
+    const candidate = await Candidate.findById(candidateId)
+      .session(session)
+      .lean();
     if (!candidate || candidate.constituency !== constituency) {
       await session.abortTransaction();
       return res.status(400).json({
         success: false,
-        message: 'Invalid candidate for this constituency.',
+        message: "Invalid candidate for this constituency.",
       });
     }
 
@@ -75,12 +82,15 @@ async function castVote(req, res) {
       await session.abortTransaction();
       return res.status(409).json({
         success: false,
-        message: 'You have already voted in this election.',
+        message: "You have already voted in this election.",
       });
     }
 
-    const lastVote = await Vote.findOne().sort({ _id: -1 }).session(session).lean();
-    const previousBlockHash = lastVote ? lastVote.currentBlockHash : '0';
+    const lastVote = await Vote.findOne()
+      .sort({ _id: -1 })
+      .session(session)
+      .lean();
+    const previousBlockHash = lastVote ? lastVote.currentBlockHash : "0";
     const voteDoc = new Vote({
       candidateId: new mongoose.Types.ObjectId(candidateId),
       voterIdHash,
@@ -93,21 +103,21 @@ async function castVote(req, res) {
     await Voter.updateOne(
       { _id: voter._id },
       { $set: { lastVotedAt: now } },
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
     res.status(201).json({
       success: true,
-      message: 'Vote recorded successfully.',
+      message: "Vote recorded successfully.",
     });
   } catch (err) {
     if (session) await session.abortTransaction();
-    console.error('castVote error:', err);
+    console.error("castVote error:", err);
     res.status(500).json({
       success: false,
-      message: err.message || 'Failed to record vote. Please try again.',
-      error: err.name
+      message: err.message || "Failed to record vote. Please try again.",
+      error: err.name,
     });
   } finally {
     session.endSession();
@@ -123,7 +133,7 @@ async function verifyVoterForAuth(req, res) {
     if (!aadhar || !constituency || !ward) {
       return res.status(400).json({
         success: false,
-        message: 'Missing aadhar, constituency, or ward.',
+        message: "Missing aadhar, constituency, or ward.",
       });
     }
 
@@ -133,13 +143,13 @@ async function verifyVoterForAuth(req, res) {
       ward: String(ward).trim(),
       isVerified: true,
     })
-      .select('fullName isVerified lastVotedAt')
+      .select("fullName isVerified lastVotedAt")
       .lean();
 
     if (!voter) {
       return res.status(404).json({
         success: false,
-        message: 'Voter not found or not verified.',
+        message: "Voter not found or not verified.",
       });
     }
 
@@ -152,12 +162,12 @@ async function verifyVoterForAuth(req, res) {
       canVote,
       lastVotedAt: voter.lastVotedAt,
       message: canVote
-        ? 'Voter verified. Proceed to biometric verification.'
-        : 'You have already voted. Cannot vote again for 3 days.',
+        ? "Voter verified. Proceed to biometric verification."
+        : "You have already voted. Cannot vote again for 3 days.",
     });
   } catch (err) {
-    console.error('verifyVoterForAuth error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("verifyVoterForAuth error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
@@ -167,12 +177,15 @@ async function verifyVoterForAuth(req, res) {
 async function getResultConstituencies(req, res) {
   try {
     const [candidateConstituencies, voteConstituencies] = await Promise.all([
-      Candidate.distinct('constituency'),
-      Vote.distinct('constituency'),
+      Candidate.distinct("constituency"),
+      Vote.distinct("constituency"),
     ]);
 
     const list = Array.from(
-      new Set([...(candidateConstituencies || []), ...(voteConstituencies || [])])
+      new Set([
+        ...(candidateConstituencies || []),
+        ...(voteConstituencies || []),
+      ]),
     )
       .filter(Boolean)
       .map((item) => String(item).trim())
@@ -180,8 +193,10 @@ async function getResultConstituencies(req, res) {
 
     res.json({ success: true, constituencies: list });
   } catch (err) {
-    console.error('getResultConstituencies error:', err);
-    res.status(500).json({ success: false, message: 'Failed to fetch constituencies.' });
+    console.error("getResultConstituencies error:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch constituencies." });
   }
 }
 
@@ -190,32 +205,32 @@ async function getResultConstituencies(req, res) {
  */
 async function getConstituencyResult(req, res) {
   try {
-    const constituency = String(req.query.constituency || '').trim();
+    const constituency = String(req.query.constituency || "").trim();
     if (!constituency) {
       return res.status(400).json({
         success: false,
-        message: 'constituency query parameter is required.',
+        message: "constituency query parameter is required.",
       });
     }
 
     const candidates = await Candidate.find({ constituency })
-      .select('name partyName photoURL symbolURL position constituency')
+      .select("name partyName photoURL symbolURL position constituency")
       .lean();
 
     if (!candidates.length) {
       return res.status(404).json({
         success: false,
-        message: 'No candidates found for this constituency.',
+        message: "No candidates found for this constituency.",
       });
     }
 
     const voteCounts = await Vote.aggregate([
       { $match: { constituency } },
-      { $group: { _id: '$candidateId', votes: { $sum: 1 } } },
+      { $group: { _id: "$candidateId", votes: { $sum: 1 } } },
     ]);
 
     const countByCandidate = new Map(
-      voteCounts.map((item) => [String(item._id), Number(item.votes || 0)])
+      voteCounts.map((item) => [String(item._id), Number(item.votes || 0)]),
     );
 
     const candidateResults = candidates
@@ -223,7 +238,9 @@ async function getConstituencyResult(req, res) {
         ...candidate,
         voteCount: countByCandidate.get(String(candidate._id)) || 0,
       }))
-      .sort((a, b) => b.voteCount - a.voteCount || a.name.localeCompare(b.name));
+      .sort(
+        (a, b) => b.voteCount - a.voteCount || a.name.localeCompare(b.name),
+      );
 
     const winner = candidateResults[0] || null;
 
@@ -235,8 +252,10 @@ async function getConstituencyResult(req, res) {
       candidates: candidateResults,
     });
   } catch (err) {
-    console.error('getConstituencyResult error:', err);
-    res.status(500).json({ success: false, message: 'Failed to fetch election result.' });
+    console.error("getConstituencyResult error:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch election result." });
   }
 }
 

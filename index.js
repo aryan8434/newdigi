@@ -4,6 +4,7 @@ const { Server } = require("socket.io");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { sanitize } = require("express-mongo-sanitize");
+const fs = require("fs");
 require("dotenv").config();
 
 const main = require("./config/mongoDB");
@@ -77,21 +78,36 @@ app.use("/api/config", configRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/admin", adminRouter);
 
-// Serve built Frontend static files
+// Serve built Frontend static files (if present)
 const path = require("path");
-const frontendDistPath = path.join(__dirname, "../Frontend/dist");
-app.use(express.static(frontendDistPath));
+const frontendDistPath = process.env.FRONTEND_DIST
+  ? path.resolve(process.env.FRONTEND_DIST)
+  : path.join(__dirname, "../Frontend/dist");
+const frontendIndexPath = path.join(frontendDistPath, "index.html");
 
-// Serve index.html for all non-API routes (SPA routing)
-// This must be after API routes and static files
-app.use((req, res, next) => {
-  if (!req.path.startsWith("/api")) {
-    return res.sendFile(path.join(frontendDistPath, "index.html"), (err) => {
-      if (err) next(err);
+if (fs.existsSync(frontendIndexPath)) {
+  app.use(express.static(frontendDistPath));
+
+  // Serve index.html for all non-API routes (SPA routing)
+  // This must be after API routes and static files
+  app.use((req, res, next) => {
+    if (!req.path.startsWith("/api")) {
+      return res.sendFile(frontendIndexPath, (err) => {
+        if (err) next(err);
+      });
+    }
+    next();
+  });
+} else {
+  console.warn("Frontend build not found at:", frontendIndexPath);
+  app.get("/", (req, res) => {
+    res.json({
+      success: true,
+      message:
+        "Backend is running. Frontend build is not deployed on this server.",
     });
-  }
-  next();
-});
+  });
+}
 
 // Socket.io: broadcast server time & election config
 io.on("connection", (socket) => {
