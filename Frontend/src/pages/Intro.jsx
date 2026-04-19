@@ -56,10 +56,10 @@ export default function Intro() {
                 Result
               </button>
               <button
-                onClick={() => navigate('/help-desk')}
+                onClick={() => navigate('/voter-registration')}
                 className="px-8 py-4 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-bold text-lg hover:border-emerald-500/50 hover:bg-slate-800 transition-all"
               >
-                Learn More
+                Register
               </button>
             </div>
 

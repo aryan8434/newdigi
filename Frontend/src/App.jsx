@@ -7,8 +7,6 @@ import VoteFlow from './pages/VoteFlow';
 import VoterRegistration from './pages/VoterRegistration';
 import CandidateRegistration from './pages/CandidateRegistration';
 import HelpDesk from './pages/HelpDesk';
-import AdminConfig from './pages/AdminConfig';
-import AdminLogin from './pages/AdminLogin';
 import ElectionResults from './pages/ElectionResults';
 
 function App() {
@@ -24,8 +22,6 @@ function App() {
           <Route path="/candidate-registration" element={<CandidateRegistration />} />
           <Route path="/help-desk" element={<HelpDesk />} />
           <Route path="/results" element={<ElectionResults />} />
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminConfig />} />
         </Routes>
       </Router>
     </LanguageProvider>

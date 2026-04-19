@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../utils/axiosClient';
 import { useLanguage } from '../contexts/LanguageContext';
-import FingerprintSimulator from '../components/FingerprintSimulator';
-import HardwareFingerprintCapture from '../components/HardwareFingerprintCapture';
+import NativeBiometricCapture from '../components/NativeBiometricCapture';
 import { ArrowLeft, Check, User, Calendar, MapPin, Hash, Phone, ShieldCheck } from 'lucide-react';
 
 export default function VoterRegistration() {
@@ -283,18 +282,7 @@ export default function VoterRegistration() {
             </div>
             
             <div className="space-y-6">
-              <HardwareFingerprintCapture onHash={setFingerprintHash} />
-              
-              <div className="relative py-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-slate-800" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-slate-900 px-3 text-slate-500 font-bold tracking-[0.2em]">OR USE SIMULATOR</span>
-                </div>
-              </div>
-
-              <FingerprintSimulator onHash={setFingerprintHash} />
+              <NativeBiometricCapture onHash={setFingerprintHash} />
             </div>
 
             {/* Verification Status */}

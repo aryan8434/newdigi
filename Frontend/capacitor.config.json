@@ -1,0 +1,14 @@
+{
+  "appId": "com.digivote.secure",
+  "appName": "secure",
+  "webDir": "dist",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "http"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

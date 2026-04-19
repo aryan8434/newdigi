@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../utils/axiosClient';
 import { useLanguage } from '../contexts/LanguageContext';
-import FingerprintSimulator from '../components/FingerprintSimulator';
-import HardwareFingerprintCapture from '../components/HardwareFingerprintCapture';
+import NativeBiometricCapture from '../components/NativeBiometricCapture';
 import { ArrowLeft, CheckCircle, UserCheck, Shield, Users, Send, MapPin, Hash, Sparkles } from 'lucide-react';
 
 const STEPS = ['details', 'fingerprint', 'candidates', 'submit'];
@@ -240,24 +239,17 @@ export default function VoteFlow() {
             
             <div className="space-y-8">
                <div className="bg-slate-950/40 border border-slate-800 rounded-3xl p-6">
-                  <HardwareFingerprintCapture onHash={setFingerprintHash} />
+                  <NativeBiometricCapture onHash={setFingerprintHash} />
                </div>
-
-               <div className="relative py-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-slate-800" />
-                  </div>
-                  <div className="relative flex justify-center text-[10px] uppercase">
-                    <span className="bg-slate-900 px-3 text-slate-600 font-black tracking-widest">Backup Authentication</span>
-                  </div>
-                </div>
-
-               <FingerprintSimulator onHash={setFingerprintHash} />
 
                <button
                   onClick={() => setStep(2)}
                   disabled={!fingerprintHash}
-                  className="w-full py-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg transition-all shadow-xl shadow-indigo-950/20 active:scale-95 disabled:opacity-20"
+                  className={`w-full py-5 rounded-2xl text-white font-bold text-lg transition-all shadow-xl active:scale-95 disabled:opacity-20 disabled:grayscale ${
+                    fingerprintHash
+                      ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/20'
+                      : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-950/20'
+                  }`}
                 >
                   Confirm & Open Ballot
                 </button>
