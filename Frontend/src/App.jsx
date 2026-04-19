@@ -1,0 +1,31 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { LanguageProvider } from './contexts/LanguageContext';
+import Intro from './pages/Intro';
+import VoterLogin from './pages/VoterLogin';
+import Home from './pages/Home';
+import VoteFlow from './pages/VoteFlow';
+import VoterRegistration from './pages/VoterRegistration';
+import CandidateRegistration from './pages/CandidateRegistration';
+import HelpDesk from './pages/HelpDesk';
+import ElectionResults from './pages/ElectionResults';
+
+function App() {
+  return (
+    <LanguageProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Intro />} />
+          <Route path="/voter-login" element={<VoterLogin />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/vote" element={<VoteFlow />} />
+          <Route path="/voter-registration" element={<VoterRegistration />} />
+          <Route path="/candidate-registration" element={<CandidateRegistration />} />
+          <Route path="/help-desk" element={<HelpDesk />} />
+          <Route path="/results" element={<ElectionResults />} />
+        </Routes>
+      </Router>
+    </LanguageProvider>
+  );
+}
+
+export default App;

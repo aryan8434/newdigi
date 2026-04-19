@@ -1,0 +1,5 @@
+package com.digivote.secure;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {}

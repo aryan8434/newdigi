@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">secure</string>
+    <string name="title_activity_main">secure</string>
+    <string name="package_name">com.digivote.secure</string>
+    <string name="custom_url_scheme">com.digivote.secure</string>
+</resources>
